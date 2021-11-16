@@ -6,9 +6,18 @@ document.addEventListener('DOMContentLoaded', function() {
   document.querySelector('#archived').addEventListener('click', () => load_mailbox('archive'));
   document.querySelector('#compose').addEventListener('click', compose_email);
 
+  // enable send button
+  document.querySelector('#compose-form').addEventListener('submit', (event) => {
+    console.log('this is the compose sending fn')
+    event.preventDefault()
+    send_mail();
+    load_mailbox('sent');
+  });
+
   // By default, load the inbox
   load_mailbox('inbox');
 });
+
 
 function compose_email() {
 
@@ -21,14 +30,9 @@ function compose_email() {
   document.querySelector('#compose-subject').value = '';
   document.querySelector('#compose-body').value = '';
 
-  // enable send button
-  document.querySelector('#compose-form').addEventListener('submit', (event) => {
-    console.log('this is the compose sending fn')
-    event.preventDefault()
-    send_mail();
-    load_mailbox('sent');
-  });
+  
 }
+
 
 function load_mailbox(mailbox) {
   console.log({mailbox})
@@ -58,7 +62,7 @@ function load_mailbox(mailbox) {
       emailEntry.style.padding = '2px'
       emailEntry.style.display = 'flex'
       emailEntry.style.justifyContent = 'space-between'
-      emailEntry.addEventListener('click', () => view_email(element.id))
+      emailEntry.addEventListener('click', () => view_email(element.id, mailbox))
       document.querySelector('#emails-view').appendChild(emailEntry);
       
     });
@@ -67,7 +71,7 @@ function load_mailbox(mailbox) {
 
 }
 
-function view_email(id){
+function view_email(id, mailbox){
   fetch(`/emails/${id}`, {
     method: 'PUT',
     body: JSON.stringify({
@@ -83,12 +87,12 @@ function view_email(id){
 
     
     var singleEmail = document.querySelector('#emails-view');
-    
-    if (email.user !== email.sender){
+    console.log(mailbox)
+    if (mailbox != 'sent'){
       if (!email.archived){
-        singleEmail.innerHTML = `<div style=''><div><strong>From: </strong>${email.sender}</div><div><strong>To: </strong>${email.recipients}</div><div><strong>Subject: </strong>${email.subject}</div><div><strong>Timestamp: </strong>${email.timestamp}</div><button class='btn btn-primary' id='replyBtn'>reply</button><button class='btn btn-warning' id='archiveBtn'>Archive</button></div><div style='margin-top:24px; border-top: 2px solid grey; padding-top: 24px;'>${email.body}</div>`;
+        singleEmail.innerHTML = `<div style=''><div><strong>From: </strong>${email.sender}</div><div><strong>To: </strong>${email.recipients}</div><div><strong>Subject: </strong>${email.subject}</div><div><strong>Timestamp: </strong>${email.timestamp}</div><button class='btn btn-primary' id='replyBtn'>Reply</button>  <button class='btn btn-warning' id='archiveBtn'>Archive</button></div><div style='margin-top:24px; border-top: 2px solid grey; padding-top: 24px;'>${email.body}</div>`;
       }else{
-        singleEmail.innerHTML = `<div style=''><div><strong>From: </strong>${email.sender}</div><div><strong>To: </strong>${email.recipients}</div><div><strong>Subject: </strong>${email.subject}</div><div><strong>Timestamp: </strong>${email.timestamp}</div><button class='btn btn-primary' id='replyBtn'>reply</button><button class='btn btn-warning' id='archiveBtn'>Unarchive</button></div><div style='margin-top:24px; border-top: 2px solid grey; padding-top: 24px;'>${email.body}</div>`;
+        singleEmail.innerHTML = `<div style=''><div><strong>From: </strong>${email.sender}</div><div><strong>To: </strong>${email.recipients}</div><div><strong>Subject: </strong>${email.subject}</div><div><strong>Timestamp: </strong>${email.timestamp}</div><button class='btn btn-primary' id='replyBtn'>Reply</button>  <button class='btn btn-warning' id='archiveBtn'>Unarchive</button></div><div style='margin-top:24px; border-top: 2px solid grey; padding-top: 24px;'>${email.body}</div>`;
       }
     }else{
       singleEmail.innerHTML = `<div style=''><div><strong>From: </strong>${email.sender}</div><div><strong>To: </strong>${email.recipients}</div><div><strong>Subject: </strong>${email.subject}</div><div><strong>Timestamp: </strong>${email.timestamp}</div><button class='btn btn-primary' id='replyBtn'>reply</button></div><div style='margin-top:24px; border-top: 2px solid grey; padding-top: 24px;'>${email.body}</div>`;
@@ -107,48 +111,42 @@ function view_email(id){
       document.querySelector('#compose-subject').value = `Re: ${email.subject}`;
       document.querySelector('#compose-body').value = `On ${email.timestamp} ${email.sender} wrote:\n${email.body}\n\n`;
 
-      // enable send button
-      document.querySelector('#compose-form').addEventListener('submit', (event) => {
-        console.log('this is the compose sending fn')
-        event.preventDefault()
-        send_mail();
-        load_mailbox('sent');
-      });
       
     })
 
-    var archiveBtn = document.querySelector('#archiveBtn');
-    archiveBtn.style.marginTop = '18px'
-    archiveBtn.addEventListener('click', () => {
-      if (email.archived){
-        fetch(`/emails/${id}`, {
-          method: 'PUT',
-          body: JSON.stringify({
-              archived: false
-          })
-        });
-        load_mailbox(archived)
-      }else{
-        fetch(`/emails/${id}`, {
-          method: 'PUT',
-          body: JSON.stringify({
-              archived: true
-          })
-        });
-        load_mailbox(inbox)
+    if (mailbox != 'sent'){
+      var archiveBtn = document.querySelector('#archiveBtn');
+      archiveBtn.style.marginTop = '18px'
+      archiveBtn.addEventListener('click', () => {
+        console.log('archive clicked')
+        if (email.archived){
+          fetch(`/emails/${id}`, {
+            method: 'PUT',
+            body: JSON.stringify({
+                archived: false
+            })
+          });
+          load_mailbox('archive')
+        }else{
+          fetch(`/emails/${id}`, {
+            method: 'PUT',
+            body: JSON.stringify({
+                archived: true
+            })
+          });
+          load_mailbox('inbox')
+        
+        }
       
-      }
-    
-    })
+      })
+    }
       
-});
+  });
 
   
 }
 
 function send_mail() {
-  console.log('This means the fn is started');
-  console.log(document.querySelector('#compose-recipients').value);
   
   fetch('/emails', {
     method: 'POST',
@@ -162,4 +160,5 @@ function send_mail() {
   .then(result => {
     console.log(result);
   });
+  
 }
