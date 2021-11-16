@@ -135,10 +135,10 @@ function view_email(id, mailbox){
               archived: false
             })
           })
+          // loads the archive mailbox once the email has been unarchived
           .then(() => {
             load_mailbox('archive')
           });
-
 
         }else{
 
@@ -149,7 +149,7 @@ function view_email(id, mailbox){
             })
           })
 
-          // loads the sentbox only after the email is confirmed as sent
+          // loads the inbox once the email has been archived
           .then(() => {
             load_mailbox('inbox')
           });
