@@ -127,7 +127,6 @@ function view_email(id, mailbox){
       archiveBtn.style.marginTop = '18px'
       archiveBtn.addEventListener('click', () => {
 
-        console.log('archive clicked')
         if (email.archived){
 
           fetch(`/emails/${id}`, {
