@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('this is the compose sending fn')
     event.preventDefault()
     send_mail();
-    load_mailbox('sent');
+    //load_mailbox('sent');
   });
 
   // By default, load the inbox
@@ -81,9 +81,6 @@ function view_email(id, mailbox){
   fetch(`/emails/${id}`)
   .then(response => response.json())
   .then(email => {
-    // Print email
-    console.log(email);
-    
 
     
     var singleEmail = document.querySelector('#emails-view');
@@ -159,6 +156,8 @@ function send_mail() {
   .then(response => response.json())
   .then(result => {
     console.log(result);
+    load_mailbox('sent')
   });
+  
   
 }
