@@ -132,20 +132,27 @@ function view_email(id, mailbox){
           fetch(`/emails/${id}`, {
             method: 'PUT',
             body: JSON.stringify({
-                archived: false
+              archived: false
             })
+          })
+          .then(() => {
+            load_mailbox('archive')
           });
-          load_mailbox('archive')
+
 
         }else{
 
           fetch(`/emails/${id}`, {
             method: 'PUT',
             body: JSON.stringify({
-                archived: true
+              archived: true
             })
+          })
+
+          // loads the sentbox only after the email is confirmed as sent
+          .then(() => {
+            load_mailbox('inbox')
           });
-          load_mailbox('inbox')
         
         }
       
