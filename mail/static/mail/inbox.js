@@ -11,7 +11,6 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function compose_email() {
-  console.log('compose mode')
 
   // Show compose view and hide other views
   document.querySelector('#emails-view').style.display = 'none';
@@ -32,6 +31,7 @@ function compose_email() {
 }
 
 function load_mailbox(mailbox) {
+  console.log({mailbox})
   
   // Show the mailbox and hide other views
   document.querySelector('#emails-view').style.display = 'block';
